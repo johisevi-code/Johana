@@ -3,6 +3,15 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Loader2, X, ImageIcon, ShieldCheck, Fingerprint, Wand2, Download } from 'lucide-react';
 import { GoogleGenAI } from '@google/genai';
 
+declare global {
+  interface Window {
+    aistudio?: {
+      hasSelectedApiKey: () => Promise<boolean>;
+      openSelectKey: () => Promise<void>;
+    };
+  }
+}
+
 const aiStyles = [
   { id: 'cinematic', label: 'Cinemático 4K', modifier: 'highly detailed, cinematic lighting, 4k resolution, photorealistic, epic composition' },
   { id: 'biomech', label: 'Biomecánico', modifier: 'biomechanical, hr giger style, organic and synthetic merging, intricate details, dark sci-fi, 4k resolution' },
@@ -101,8 +110,9 @@ export default function Visions() {
       });
 
       let foundImage = false;
-      if (response.candidates && response.candidates[0] && response.candidates[0].content.parts) {
-        for (const part of response.candidates[0].content.parts) {
+      const parts = response.candidates?.[0]?.content?.parts;
+      if (parts) {
+        for (const part of parts) {
           if (part.inlineData) {
             const base64EncodeString = part.inlineData.data;
             setGeneratedImage(`data:image/png;base64,${base64EncodeString}`);
